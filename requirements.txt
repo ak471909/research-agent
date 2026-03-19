@@ -1,7 +1,9 @@
 langchain==0.3.14
 langgraph==0.2.73
 langchain-google-genai==2.0.8
-langchain-core==0.3.29
+langchain-core==1.2.19
+langchain-groq==1.1.2
+groq==0.37.1
 google-generativeai==0.8.3
 tavily-python==0.5.0
 streamlit==1.41.1

@@ -9,7 +9,6 @@ from langchain_core.messages import HumanMessage
 
 load_dotenv()
 
-# creating A UI for the page
 st.set_page_config(
     page_title="Research Agent",
     page_icon="🔍",
@@ -27,7 +26,13 @@ query = st.text_input(
 if st.button("Research", disabled=not query):
     from agent.graph import research_graph
 
-    with st.spinner("Searching and reading sources..."):
+    tool_calls_made = []
+    status_placeholder = st.empty()
+    answer_placeholder = st.empty()
+
+    with st.spinner(""):
+        status_placeholder.caption("Searching the web...")
+
         result = research_graph.invoke(
             {
                 "messages": [HumanMessage(content=query)],
@@ -35,16 +40,25 @@ if st.button("Research", disabled=not query):
             }
         )
 
-    messages = result["messages"]
-    final_answer = messages[-1].content
+        messages = result["messages"]
 
-    tool_calls_made = []
-    for msg in messages:
-        if hasattr(msg, "tool_calls") and msg.tool_calls:
-            for tc in msg.tool_calls:
-                tool_calls_made.append(tc["name"])
+        for msg in messages:
+            if hasattr(msg, "tool_calls") and msg.tool_calls:
+                for tc in msg.tool_calls:
+                    tool_calls_made.append(tc["name"])
+                    if tc["name"] == "web_search":
+                        status_placeholder.caption(
+                            f"Searched for: {tc['args'].get('query', '')}"
+                        )
+                    elif tc["name"] == "read_page":
+                        status_placeholder.caption(
+                            f"Reading: {tc['args'].get('url', '')[:60]}..."
+                        )
 
-    st.markdown(final_answer)
+        final_answer = messages[-1].content
+        status_placeholder.empty()
+
+    answer_placeholder.markdown(final_answer)
 
     with st.expander("How this answer was produced"):
         st.write(f"**Total turns:** {len(messages)}")

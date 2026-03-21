@@ -14,3 +14,5 @@ class AgentState(TypedDict):
 
     messages: Annotated[list, add_messages]
     sources: list[str]
+    iterations: int
+    read_page_count: int

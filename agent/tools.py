@@ -12,19 +12,24 @@ def web_search(query: str) -> str:
     Returns the top results with titles, URLs, and snippets.
     Use this when you need up-to-date facts or information.
     """
-    client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
-    response = client.search(query=query, max_results=5)
+    try:
+        client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
+        response = client.search(query=query, max_results=5)
 
-    if not response.get("results"):
-        return "No results found."
+        if not response.get("results"):
+            return "No results found."
 
-    formatted = []
-    for r in response["results"]:
-        formatted.append(
-            f"Title: {r['title']}\n" f"URL: {r['url']}\n" f"Snippet: {r['content']}\n"
-        )
+        formatted = []
+        for r in response["results"]:
+            formatted.append(
+                f"Title: {r['title']}\n"
+                f"URL: {r['url']}\n"
+                f"Snippet: {r['content']}\n"
+            )
 
-    return "\n---\n".join(formatted)
+        return "\n---\n".join(formatted)
+    except Exception as e:
+        return f"Search failed: {str(e)}. Ty a different search query."
 
 
 @tool
@@ -49,9 +54,11 @@ def read_page(url: str) -> str:
         return cleaned[:4000] if cleaned else "Could not extract text from this page."
 
     except httpx.TimeoutException:
-        return f"Timeout reading {url} — skipping."
+        return f"Timeout reading {url} — page took too long to load, skip this source."
+    except httpx.HTTPStatusError as e:
+        return f"HTTP {e.response.status_code} error reading {url} - skip this source."
     except Exception as e:
-        return f"Could not read {url}: {str(e)}"
+        return f"Could not read {url}: {str(e)} - skip this source and try another."
 
 
 TOOLS = [web_search, read_page]

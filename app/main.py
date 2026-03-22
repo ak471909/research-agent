@@ -9,6 +9,13 @@ from langchain_core.messages import HumanMessage
 
 load_dotenv()
 
+if "OPENAI_API_KEY" in st.secrets:
+    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+    os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
+    os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGCHAIN_API_KEY"]
+    os.environ["LANGCHAIN_TRACING_V2"] = st.secrets["LANGCHAIN_TRACING_V2"]
+    os.environ["LANGCHAIN_PROJECT"] = st.secrets["LANGCHAIN_PROJECT"]
+
 st.set_page_config(
     page_title="Research Agent",
     page_icon="🔍",
